@@ -25,8 +25,8 @@ if __name__ == '__main__':
     exclude = [':']
     concurrency = 4
     output = 'csv'
-    max_crawl = 50
-    max_parse = 200
+    max_crawl = 10
+    max_parse = 10
     delay = 0
     headers = {"user_agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) "
                              "AppleWebKit 537.36 (KHTML, like Gecko) Chrome",

@@ -58,7 +58,7 @@ class BaseWebSpider:
         self.exclude = exclude if isinstance(exclude, list) else []
 
         self.concurrency = concurrency
-        self.timeout = timeout
+        self.timeout = timedelta(seconds=timeout) if timeout else None
         self.delay = delay
 
         self.q_crawl = BQueue(capacity=max_crawl)
@@ -66,6 +66,8 @@ class BaseWebSpider:
 
         self.brief = defaultdict(set)
         self.data = []
+
+        self.can_parse = False
 
         self.log = logging.getLogger()
         self.log.setLevel(logging.INFO)
@@ -151,6 +153,9 @@ class BaseWebSpider:
                     yield self.q_parse.put(url)
                     self.brief['parsing'].add(url)
                     self.log.info('Captured: {}'.format(url))
+
+                if not self.can_parse and self.q_parse.qsize() > 0:
+                    self.can_parse = True
         finally:
             self.q_crawl.task_done()
 
@@ -173,9 +178,7 @@ class BaseWebSpider:
     @gen.coroutine
     def parser(self):
         while True:
-            qsize = self.q_parse.qsize()
-            if qsize > 0:
-                self.log.info('PARSING QUEUE is about {} members'.format(qsize))
+            if self.can_parse:
                 yield self.parse_url()
             else:
                 yield gen.sleep(0.5)
@@ -207,7 +210,7 @@ class BaseWebSpider:
             self.crawler()
             self.parser()
 
-        yield self.q_crawl.join(timeout=timedelta(seconds=self.timeout))
+        yield self.q_crawl.join(timeout=self.timeout)
         yield self.q_parse.join()
 
         end = time.time()
