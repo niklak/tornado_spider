@@ -110,7 +110,7 @@ class BaseWebSpider:
                 else response.body.decode()
         except:
             self.log.error('Error during fetching urls!', exc_info=True)
-            raise gen.Return([])
+            return 
         return doc
 
     @gen.coroutine
