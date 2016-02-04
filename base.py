@@ -154,8 +154,8 @@ class BaseWebSpider:
                     self.brief['parsing'].add(url)
                     self.log.info('Captured: {}'.format(url))
 
-                if not self.can_parse and self.q_parse.qsize() > 0:
-                    self.can_parse = True
+            if not self.can_parse and self.q_parse.qsize() > 0:
+                self.can_parse = True
         finally:
             self.q_crawl.task_done()
 
