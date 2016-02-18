@@ -46,7 +46,7 @@ class BaseWebSpider:
 
     def __init__(self, base_url, capture_pattern, concurrency=2, timeout=300,
                  delay=0, headers=None, exclude=None, verbose=True,
-                 output='json', max_crawl=0, max_parse=0, start_url=None):
+                 output='json', max_crawl=0, max_parse=0, start_url=None, retries=2):
 
         assert output in self.OUTPUT_FORMATS, 'Unsupported output format'
 
@@ -60,6 +60,8 @@ class BaseWebSpider:
         self.concurrency = concurrency
         self.timeout = timedelta(seconds=timeout) if timeout else None
         self.delay = delay
+
+        self.retries = retries    # retries for parser
 
         self.q_crawl = BQueue(capacity=max_crawl)
         self.q_parse = BQueue(capacity=max_parse)
@@ -177,11 +179,16 @@ class BaseWebSpider:
 
     @gen.coroutine
     def parser(self):
+        retries = self.retries
+
         while True:
             if self.can_parse:
                 yield self.parse_url()
-            else:
+            elif retries > 0:
+                retries -= 1
                 yield gen.sleep(0.5)
+            else:
+                break
 
             yield self.__wait('Parser')
         return

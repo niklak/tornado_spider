@@ -23,7 +23,7 @@ if __name__ == '__main__':
     base_url = 'https://en.wikipedia.org/'
     capture = '/wiki/'
     exclude = [':']
-    concurrency = 4
+    concurrency = 2
     output = 'csv'
     max_crawl = 10
     max_parse = 10
